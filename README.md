@@ -26,8 +26,8 @@
 
 ### Установка
 ```bash
-git clone https://github.com/yourusername/chatbot.git
-cd chatbot
+git clone https://github.com/yourusername/olymp_schools.git
+cd AI
 pip install -r requirements.txt
 ```
 
@@ -38,8 +38,8 @@ pip install -r requirements.txt
 │   ├── patterns.csv    # Шаблоны фраз
 │   └── responses.csv   # Варианты ответов
 ├── models/             # Обученные модели
-├── train.py            # Скрипт обучения
-└── chat.py             # Интерфейс чата
+├── train_model.py            # Скрипт обучения
+└── chat_model.py             # Интерфейс чата
 ```
 
 ## 🧠 Как это работает
@@ -103,10 +103,10 @@ graph TD
 ## 🧪 Тестирование
 ```bash
 # Обучение модели
-python train.py
+python train_model.py
 
 # Запуск чата
-python chat.py
+python chat_model.py
 
 Пример диалога:
 Вы: Приветствую!

@@ -1,0 +1,78 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - auth-service
+      - users-service
+  auth_db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_DATABASE}
+    volumes:
+      - ./auth-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - auth_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER} -d ${AUTH_DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  users_db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${USERS_DB_USER}
+      POSTGRES_PASSWORD: ${USERS_DB_PASSWORD}
+      POSTGRES_DB: ${USERS_DB_DATABASE}
+    volumes:
+      - ./users-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - users_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USERS_DB_USER} -d ${USERS_DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build: ./auth-service
+    environment:
+      PG_HOST: ${AUTH_DB_HOST}
+      PG_USER: ${AUTH_DB_USER}
+      PG_PASSWORD: ${AUTH_DB_PASSWORD}
+      PG_DATABASE: ${AUTH_DB_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}
+
+    ports:
+      - "8001:8001"
+    depends_on:
+      auth_db:
+        condition: service_healthy
+  users-service:
+    build: ./users-service
+    environment:
+      PG_HOST: ${USERS_DB_HOST}
+      PG_USER: ${USERS_DB_USER}
+      PG_PASSWORD: ${USERS_DB_PASSWORD}
+      PG_DATABASE: ${USERS_DB_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8002:8002"
+    depends_on:
+      users_db:
+        condition: service_healthy
+
+volumes:
+  auth_db_data:
+  users_db_data:
+  
+  

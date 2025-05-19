@@ -207,6 +207,206 @@
           }
         }
       ]
+    },
+    {
+      "name": "News Service",
+      "item": [
+        {
+          "name": "Получить все новости",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news"]
+            },
+            "description": "Получение списка всех новостей"
+          }
+        },
+        {
+          "name": "Получить новость по ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news", "1"]
+            },
+            "description": "Получение новости по ID"
+          }
+        },
+        {
+          "name": "Создать новость",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Заголовок новости\",\n  \"description\": \"Краткое описание новости\",\n  \"content\": \"Полный текст новости с подробным описанием события.\",\n  \"images\": []\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news"]
+            },
+            "description": "Создание новой новости"
+          }
+        },
+        {
+          "name": "Обновить новость",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Обновленный заголовок новости\",\n  \"description\": \"Обновленное краткое описание новости\",\n  \"content\": \"Обновленный полный текст новости с подробным описанием события.\",\n  \"images\": [\"image1.jpg\", \"image2.jpg\"]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news", "1"]
+            },
+            "description": "Обновление существующей новости по ID"
+          }
+        },
+        {
+          "name": "Удалить новость",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news", "1"]
+            },
+            "description": "Удаление новости по ID"
+          }
+        },
+        {
+          "name": "Загрузить изображение",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/path/to/image.jpg",
+                  "description": "Изображение для загрузки"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "upload"]
+            },
+            "description": "Загрузка изображения для новости"
+          }
+        },
+        {
+          "name": "Добавить изображение к новости",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrl\": \"image1.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news/1/images",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news", "1", "images"]
+            },
+            "description": "Добавление изображения к существующей новости"
+          }
+        },
+        {
+          "name": "Удалить изображение из новости",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/news-service/news/1/images/image1.jpg",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "news-service", "news", "1", "images", "image1.jpg"]
+            },
+            "description": "Удаление изображения из новости"
+          }
+        }
+      ]
     }
   ],
   "event": [

@@ -8,6 +8,7 @@ services:
     depends_on:
       - auth-service
       - users-service
+      - news-service
   
   rabbitmq:
     image: rabbitmq:3-management
@@ -53,6 +54,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  news_db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${NEWS_DB_USER}
+      POSTGRES_PASSWORD: ${NEWS_DB_PASSWORD}
+      POSTGRES_DB: ${NEWS_DB_DATABASE}
+    volumes:
+      - ./news-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - news_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${NEWS_DB_USER} -d ${NEWS_DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   auth-service:
     build: ./auth-service
@@ -93,10 +109,30 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+  
+  news-service:
+    build: ./news-service
+    environment:
+      PG_HOST: ${NEWS_DB_HOST}
+      PG_USER: ${NEWS_DB_USER}
+      PG_PASSWORD: ${NEWS_DB_PASSWORD}
+      PG_DATABASE: ${NEWS_DB_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./news-service/uploads:/app/uploads
+    depends_on:
+      news_db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   auth_db_data:
   users_db_data:
+  news_db_data:
   rabbitmq_data:
   
   

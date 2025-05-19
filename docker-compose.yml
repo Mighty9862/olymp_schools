@@ -8,6 +8,23 @@ services:
     depends_on:
       - auth-service
       - users-service
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"  # AMQP порт
+      - "15672:15672"  # Порт управления
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
   auth_db:
     image: postgres:15
     environment:
@@ -51,12 +68,15 @@ services:
       SMTP_USER: ${SMTP_USER}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ${SMTP_FROM}
-
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     ports:
       - "8001:8001"
     depends_on:
       auth_db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  
   users-service:
     build: ./users-service
     environment:
@@ -65,14 +85,18 @@ services:
       PG_PASSWORD: ${USERS_DB_PASSWORD}
       PG_DATABASE: ${USERS_DB_DATABASE}
       JWT_SECRET: ${JWT_SECRET}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     ports:
       - "8002:8002"
     depends_on:
       users_db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   auth_db_data:
   users_db_data:
+  rabbitmq_data:
   
   

@@ -3,11 +3,9 @@ import bcrypt from 'bcryptjs';
 import { generateResetCode } from '../middlewares/password_reset.middleware.js'
 
 export const createUser = async (email, password, role = 'user') => {
-  // Проверяем, есть ли уже пользователи в системе
   const countResult = await pool.query('SELECT COUNT(*) FROM users');
   const userCount = parseInt(countResult.rows[0].count);
   
-  // Если пользователей нет, то первый становится админом
   const userRole = userCount === 0 ? 'admin' : role;
   
   const hashedPassword = await bcrypt.hash(password, 10);

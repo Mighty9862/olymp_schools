@@ -65,7 +65,6 @@ export const login = async (req, res, next) => {
       return res.status(401).json({ error: 'Неверный email или пароль' });
     }
     
-    // Убираем email из токена, оставляем только id и role
     const token = jwt.sign(
       { 
         id: user.id,

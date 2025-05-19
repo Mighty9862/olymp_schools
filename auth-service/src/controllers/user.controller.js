@@ -22,13 +22,11 @@ export const makeAdmin = async (req, res, next) => {
   try {
     const { userId } = req.params;
     
-    // Проверяем, существует ли пользователь
     const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'Пользователь не найден' });
     }
     
-    // Обновляем роль пользователя
     const updatedUser = await updateUserRole(userId, 'admin');
     
     res.status(200).json({ 

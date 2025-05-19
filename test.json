@@ -1,0 +1,242 @@
+{
+  "info": {
+    "_postman_id": "a5e3b8d7-f2c6-4e5c-9a1d-8f6e9c1b2d3e",
+    "name": "Olymp Schools API",
+    "description": "API для системы Olymp Schools",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth Service",
+      "item": [
+        {
+          "name": "Регистрация",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/auth-service/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth-service", "register"]
+            },
+            "description": "Регистрация нового пользователя"
+          }
+        },
+        {
+          "name": "Авторизация",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/auth-service/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth-service", "login"]
+            },
+            "description": "Авторизация пользователя"
+          }
+        },
+        {
+          "name": "Запрос на сброс пароля",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/auth-service/request-password-reset",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth-service", "request-password-reset"]
+            },
+            "description": "Запрос на сброс пароля"
+          }
+        },
+        {
+          "name": "Сброс пароля",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\",\n  \"password\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/auth-service/reset-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth-service", "reset-password"]
+            },
+            "description": "Сброс пароля с использованием кода"
+          }
+        },
+        {
+          "name": "Получить информацию о себе",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/auth-service/me",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth-service", "me"]
+            },
+            "description": "Получение информации о текущем пользователе"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users Service",
+      "item": [
+        {
+          "name": "Получить профиль",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/users-service/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users-service", "profile"]
+            },
+            "description": "Получение профиля пользователя"
+          }
+        },
+        {
+          "name": "Обновить профиль",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Иван\",\n  \"patronymic\": \"Иванович\",\n  \"lastName\": \"Иванов\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"region\": \"Москва\",\n  \"city\": \"Москва\",\n  \"institute\": \"МГУ\",\n  \"gender\": \"мужской\",\n  \"class_name\": \"10А\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users-service/updateProfile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users-service", "updateProfile"]
+            },
+            "description": "Обновление профиля пользователя"
+          }
+        },
+        {
+          "name": "Добавить пользователя (админ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"firstName\": \"Петр\",\n  \"patronymic\": \"Петрович\",\n  \"lastName\": \"Петров\",\n  \"dateOfBirth\": \"1995-05-05\",\n  \"phone\": \"+7 (999) 987-65-43\",\n  \"region\": \"Санкт-Петербург\",\n  \"city\": \"Санкт-Петербург\",\n  \"institute\": \"СПбГУ\",\n  \"gender\": \"мужской\",\n  \"class_name\": \"11Б\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users-service/addUser",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users-service", "addUser"]
+            },
+            "description": "Добавление нового пользователя (требуется админ-доступ)"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    if (pm.response.json().token) {",
+          "        pm.environment.set('token', pm.response.json().token);",
+          "        console.log('Токен сохранен:', pm.response.json().token);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

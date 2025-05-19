@@ -147,8 +147,40 @@
               "port": "8000",
               "path": ["api", "users-service", "profile"]
             },
-            "description": "Получение профиля пользователя"
-          }
+            "description": "Получение профиля пользователя с информацией о роли"
+          },
+          "response": [
+            {
+              "name": "Успешный ответ",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8000/api/users-service/profile",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8000",
+                  "path": ["api", "users-service", "profile"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"email\": \"test@example.com\",\n  \"firstName\": \"Иван\",\n  \"patronymic\": \"Иванович\",\n  \"lastName\": \"Иванов\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"region\": \"Москва\",\n  \"city\": \"Москва\",\n  \"institute\": \"МГУ\",\n  \"gender\": \"мужской\",\n  \"class_name\": \"10А\",\n  \"role\": \"user\"\n}"
+            }
+          ]
         },
         {
           "name": "Обновить профиль",
@@ -205,6 +237,62 @@
             },
             "description": "Добавление нового пользователя (требуется админ-доступ)"
           }
+        },
+        {
+          "name": "Назначить пользователя администратором",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/auth-service/users/1/make-admin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth-service", "users", "1", "make-admin"]
+            },
+            "description": "Назначение пользователя администратором (требуется админ-доступ)"
+          },
+          "response": [
+            {
+              "name": "Успешный ответ",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8000/api/auth-service/users/1/make-admin",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8000",
+                  "path": ["api", "auth-service", "users", "1", "make-admin"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Пользователь успешно назначен администратором\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"test@example.com\",\n    \"role\": \"admin\"\n  }\n}"
+            }
+          ]
         }
       ]
     },

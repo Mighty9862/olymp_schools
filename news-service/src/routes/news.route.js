@@ -14,7 +14,7 @@ router.put('/news/:id', protect, adminOnly, updateNewsItem);
 router.delete('/news/:id', protect, adminOnly, deleteNewsItem);
 
 // Маршруты для изображений
-router.post('/upload', protect, upload.single('image'), uploadImage);
+router.post('/upload', protect, adminOnly, upload.single('image'), uploadImage);
 router.post('/news/:id/images', protect, adminOnly, addImage);
 router.delete('/news/:id/images/:imageUrl', protect, adminOnly, removeImage);
 

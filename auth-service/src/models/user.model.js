@@ -2,11 +2,18 @@ import pool from '../config/pool.js';
 import bcrypt from 'bcryptjs';
 import { generateResetCode } from '../middlewares/password_reset.middleware.js'
 
-export const createUser = async (email, password) => {
+export const createUser = async (email, password, role = 'user') => {
+  // Проверяем, есть ли уже пользователи в системе
+  const countResult = await pool.query('SELECT COUNT(*) FROM users');
+  const userCount = parseInt(countResult.rows[0].count);
+  
+  // Если пользователей нет, то первый становится админом
+  const userRole = userCount === 0 ? 'admin' : role;
+  
   const hashedPassword = await bcrypt.hash(password, 10);
   const result = await pool.query(
-    'INSERT INTO users(email, password_hash) VALUES($1, $2) RETURNING id, email',
-    [email, hashedPassword]
+    'INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING *',
+    [email, hashedPassword, userRole]
   );
   return result.rows[0];
 };
@@ -44,6 +51,14 @@ export const updateUserPassword = async (userId, password) => {
     `UPDATE users SET password_hash = $1 WHERE id = $2`,
     [hashedPassword, userId]
   );
+};
+
+export const updateUserRole = async (userId, role) => {
+  const result = await pool.query(
+    'UPDATE users SET role = $1 WHERE id = $2 RETURNING *',
+    [role, userId]
+  );
+  return result.rows[0];
 };
 
 export const deleteResetCode = async (code) => {

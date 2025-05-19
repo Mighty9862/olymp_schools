@@ -28,16 +28,24 @@ export const register = async (req, res, next) => {
     const user = await createUser(email, password);
     
     await publishUserCreated({
-      email
+      email,
+      role: user.role || 'user'  // Добавляем роль пользователя в сообщение
     });
 
     const token = jwt.sign(
-      { id: user.id },
+      { id: user.id, role: user.role || 'user' },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    res.status(201).json({ user, token });
+    res.status(201).json({ 
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role || 'user' 
+      }, 
+      token 
+    });
   } catch (err) {
     next(err);
   }
@@ -57,13 +65,17 @@ export const login = async (req, res, next) => {
       return res.status(401).json({ error: 'Неверный email или пароль' });
     }
     
+    // Убираем email из токена, оставляем только id и role
     const token = jwt.sign(
-      { id: user.id },
+      { 
+        id: user.id,
+        role: user.role
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
     
-    res.json({ user: { id: user.id, email: user.email }, token });
+    res.json({ user: { id: user.id, email: user.email, role: user.role }, token });
   } catch (err) {
     next(err);
   }

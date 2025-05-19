@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { register, login, requestPasswordReset, resetPassword } from '../controllers/auth.controller.js';
+import { makeAdmin, getMe } from '../controllers/user.controller.js';
 import { body } from 'express-validator';
+import { protect, adminOnly } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
@@ -22,4 +24,11 @@ router.post('/reset-password',
   body('password').isLength({ min: 4 }),
   resetPassword
 );
+
+// Добавляем маршрут для получения информации о текущем пользователе
+router.get('/me', protect, getMe);
+
+// Добавляем маршрут для назначения администратора
+router.post('/users/:userId/make-admin', protect, adminOnly, makeAdmin);
+
 export default router;

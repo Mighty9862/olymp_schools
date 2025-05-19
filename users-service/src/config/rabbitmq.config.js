@@ -8,7 +8,6 @@ export const connectRabbitMQ = async () => {
     connection = await amqp.connect(process.env.RABBITMQ_URL);
     channel = await connection.createChannel();
     
-    // Определяем очереди
     await channel.assertQueue('user_created', { durable: true });
     await channel.assertQueue('user_updated', { durable: true });
     
@@ -61,7 +60,6 @@ export const closeConnection = async () => {
   console.log('RabbitMQ connection closed');
 };
 
-// Обработка завершения процесса
 process.on('SIGINT', async () => {
   await closeConnection();
   process.exit(0);

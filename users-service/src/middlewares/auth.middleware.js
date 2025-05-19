@@ -11,7 +11,6 @@ export const protect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Получаем email из базы данных по id
     const result = await pool.query(
       'SELECT email FROM users WHERE id = $1',
       [decoded.id]

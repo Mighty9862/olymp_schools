@@ -9,7 +9,6 @@ app.use(express.json());
 
 app.use('/api', router);
 
-// Инициализация RabbitMQ
 const initializeApp = async () => {
   try {
     await connectRabbitMQ();

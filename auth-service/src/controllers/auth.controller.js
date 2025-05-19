@@ -27,7 +27,6 @@ export const register = async (req, res, next) => {
 
     const user = await createUser(email, password);
     
-    // Публикуем сообщение о создании пользователя
     await publishUserCreated({
       email
     });
@@ -81,13 +80,11 @@ export const requestPasswordReset = async (req, res, next) => {
     
     const user = await findUserByEmail(email);
     if (!user) {
-      // Для безопасности не сообщаем, что пользователь не существует
       return res.status(200).json({ message: 'Если пользователь существует, на указанный email будет отправлен код сброса пароля' });
     }
     
     const code = await createPasswordResetCode(user.id);
-    
-    // Публикуем сообщение для отправки email
+
     await publishPasswordReset(email, code);
     
     res.status(200).json({ message: 'Код сброса пароля отправлен на указанный email' });

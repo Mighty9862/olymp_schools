@@ -13,7 +13,6 @@ app.use('/api', router);
 app.use(ConnectionError);
 app.use(JsonError);
 
-// Инициализация RabbitMQ
 const initializeApp = async () => {
   try {
     await connectRabbitMQ();

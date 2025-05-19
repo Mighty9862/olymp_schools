@@ -3,7 +3,6 @@ import dbConfig from './db.config.js';
 
 const pool = new Pool(dbConfig);
 
-// Проверка подключения
 pool.query('SELECT NOW()')
   .then(() => console.log('✅ PostgreSQL connected'))
   .catch(err => {

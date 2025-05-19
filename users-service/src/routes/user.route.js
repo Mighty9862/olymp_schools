@@ -5,7 +5,7 @@ import { addUser, getUser, updateProfile } from '../controllers/user.controller.
 const router = Router();
 
 router.post('/addUser', protect, addUser);
-router.get('/profile', protect, getUser); // Изменено с getUser на profile
+router.get('/profile', protect, getUser);
 router.put('/updateProfile', protect, updateProfile);
 
 export default router;

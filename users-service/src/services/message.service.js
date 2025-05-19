@@ -1,19 +1,16 @@
 import { publishMessage, consumeMessages } from '../config/rabbitmq.config.js';
 import pool from '../config/pool.js';
 
-// Публикация сообщений
 export const publishUserUpdated = async (userData) => {
   await publishMessage('user_updated', userData);
 };
 
-// Обработка сообщений
 export const setupMessageConsumers = async () => {
-  // Обработка создания пользователя
   await consumeMessages('user_created', async (userData) => {
     try {
       const { 
         email,
-        firstName = "Новый пользователь",  // Значение по умолчанию
+        firstName = "Новый пользователь",
         patronymic = "",
         lastName = "",
         dateOfBirth = new Date().toISOString().split('T')[0],
@@ -25,14 +22,12 @@ export const setupMessageConsumers = async () => {
         class_name = ""
       } = userData;
       
-      // Проверяем, существует ли пользователь
       const existingUser = await pool.query(
         'SELECT * FROM users WHERE email = $1',
         [email]
       );
       
       if (existingUser.rows.length === 0) {
-        // Создаем пользователя
         await pool.query(
           `INSERT INTO users(
             email, firstName, patronymic, lastName, dateOfBirth, 

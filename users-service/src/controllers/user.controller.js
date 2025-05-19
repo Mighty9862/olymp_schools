@@ -49,7 +49,7 @@ export const addUser = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
-    const { email } = req.user; // Теперь email получается из базы данных по id
+    const { email } = req.user;
     
     const result = await pool.query(
       'SELECT * FROM users WHERE email = $1',
@@ -69,7 +69,7 @@ export const getUser = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const { email } = req.user; // Теперь email получается из базы данных по id
+    const { email } = req.user;
     const {
       firstName,
       patronymic,
@@ -83,7 +83,6 @@ export const updateProfile = async (req, res, next) => {
       class_name
     } = req.body;
     
-    // Обновляем профиль пользователя
     const result = await pool.query(
       `UPDATE users SET 
         firstName = $1, 

@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   nginx:
     image: nginx:latest
@@ -9,12 +11,13 @@ services:
       - auth-service
       - users-service
       - news-service
-  
+      - client
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"  # AMQP порт
-      - "15672:15672"  # Порт управления
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
@@ -25,7 +28,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
   auth_db:
     image: postgres:15
     environment:
@@ -33,13 +36,14 @@ services:
       POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
       POSTGRES_DB: ${AUTH_DB_DATABASE}
     volumes:
-      - ./auth-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./olymp_schools-test/auth-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - auth_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER} -d ${AUTH_DB_DATABASE}"]
       interval: 5s
       timeout: 5s
       retries: 5
+
   users_db:
     image: postgres:15
     environment:
@@ -47,14 +51,14 @@ services:
       POSTGRES_PASSWORD: ${USERS_DB_PASSWORD}
       POSTGRES_DB: ${USERS_DB_DATABASE}
     volumes:
-      - ./users-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./olymp_schools-test/users-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - users_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${USERS_DB_USER} -d ${USERS_DB_DATABASE}"]
       interval: 5s
       timeout: 5s
       retries: 5
-  
+
   news_db:
     image: postgres:15
     environment:
@@ -62,7 +66,7 @@ services:
       POSTGRES_PASSWORD: ${NEWS_DB_PASSWORD}
       POSTGRES_DB: ${NEWS_DB_DATABASE}
     volumes:
-      - ./news-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./olymp_schools-test/news-service/src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
       - news_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${NEWS_DB_USER} -d ${NEWS_DB_DATABASE}"]
@@ -71,7 +75,7 @@ services:
       retries: 5
 
   auth-service:
-    build: ./auth-service
+    build: ./olymp_schools-test/auth-service
     environment:
       PG_HOST: ${AUTH_DB_HOST}
       PG_USER: ${AUTH_DB_USER}
@@ -92,9 +96,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-  
+
   users-service:
-    build: ./users-service
+    build: ./olymp_schools-test/users-service
     environment:
       PG_HOST: ${USERS_DB_HOST}
       PG_USER: ${USERS_DB_USER}
@@ -109,9 +113,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-  
+
   news-service:
-    build: ./news-service
+    build: ./olymp_schools-test/news-service
     environment:
       PG_HOST: ${NEWS_DB_HOST}
       PG_USER: ${NEWS_DB_USER}
@@ -122,17 +126,20 @@ services:
     ports:
       - "8003:8003"
     volumes:
-      - ./news-service/uploads:/app/uploads
+      - ./olymp_schools-test/news-service/uploads:/app/uploads
     depends_on:
       news_db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
+  client:
+    build: ./olymp_schools-client-main
+    ports:
+      - "3000:80"
+
 volumes:
   auth_db_data:
   users_db_data:
   news_db_data:
   rabbitmq_data:
-  
-  

@@ -6,6 +6,8 @@ import cors from "cors";
 import routes from "./routes/index.js";
 import { connectRabbitMQ } from "./config/rabbitmq.config.js";
 import { startNewsConsumers } from "./services/news.service.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
@@ -20,12 +22,13 @@ connectRabbitMQ()
   });
 
 app.use(helmet());
-
 app.use(compression());
-
 app.use(cors());
-
 app.use(express.json());
+
+// Раздача статики из папки /uploads
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use("/api", routes);
 

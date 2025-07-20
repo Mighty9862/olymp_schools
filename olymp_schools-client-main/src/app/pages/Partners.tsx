@@ -44,7 +44,10 @@ const partners = [
     size: "h-20",
   },
   {
-    logo: "/standart_logo.svg",
+    logo: {
+      dark: "/standart_logo.svg",
+      light: "/standart_logo_dark.png", // Добавляем альтернативный логотип для светлой темы
+    },
     name: "СтандартПроект",
     size: "h-72",
   },
@@ -80,6 +83,14 @@ const itemVariants = {
 
 export default function Partners() {
   const { isDarkMode } = useThemeStore();
+
+  // Функция для получения правильного логотипа в зависимости от темы
+  const getLogo = (logo: string | { dark: string; light: string }) => {
+    if (typeof logo === "string") {
+      return logo;
+    }
+    return isDarkMode ? logo.dark : logo.light;
+  };
 
   return (
     <div
@@ -128,7 +139,7 @@ export default function Partners() {
                   )}
                 >
                   <img
-                    src={partner.logo}
+                    src={getLogo(partner.logo)}
                     alt={partner.name}
                     className={cn("object-contain", partner.size)}
                   />

@@ -13,42 +13,81 @@ import { IForm } from "../types/IForm.type";
 import Stepper, { Step } from "../components/ui/Stepper/Stepper";
 import { useRef, useState } from "react";
 import { useStepStore } from "../stores/StepsStore";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
+import { useRegistrationStore } from "../stores/registrationStore";
 
 function Registration() {
   const API_URL = import.meta.env.VITE_API_URL;
   const { currentStep, setStep, nextStep, prevStep, resetStep } =
     useStepStore();
   const { setToken } = useAuthStore();
+  const { registrationData, clearRegistrationData } = useRegistrationStore();
   const stepperRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { isDarkMode } = useThemeStore();
+  const navigate = useNavigate();
 
   // Форма для первого шага (авторизация)
-  const { register: registerAuth, handleSubmit: handleAuthSubmit } = useForm<{
+  const {
+    register: registerAuth,
+    handleSubmit: handleAuthSubmit,
+    formState: { errors: authErrors },
+    watch: watchAuth,
+    reset: resetAuth,
+  } = useForm<{
     email: string;
     password: string;
-  }>();
+    confirmPassword: string;
+  }>({
+    defaultValues: registrationData.auth,
+  });
 
   // Форма для второго и третьего шага (профиль)
-  const { register: registerProfile, handleSubmit: handleProfileSubmit } =
-    useForm<IForm>();
+  const {
+    register: registerProfile,
+    handleSubmit: handleProfileSubmit,
+    formState: { errors: profileErrors },
+    reset: resetProfile,
+  } = useForm<IForm>({
+    defaultValues: registrationData.profile,
+  });
+
+  // Валидация пароля
+  const validatePassword = (value: string) => {
+    if (value.length < 6) {
+      return "Пароль должен содержать минимум 6 символов";
+    }
+    if (!/[A-Z]/.test(value)) {
+      return "Пароль должен содержать хотя бы одну заглавную букву";
+    }
+    if (!/[0-9]/.test(value)) {
+      return "Пароль должен содержать хотя бы одну цифру";
+    }
+    return true;
+  };
+
+  // Валидация подтверждения пароля
+  const validateConfirmPassword = (value: string) => {
+    const password = watchAuth("password");
+    return value === password || "Пароли не совпадают";
+  };
 
   // Обработчик первого шага (регистрация)
-  const handleAuth: SubmitHandler<{ email: string; password: string }> = async (
-    data,
-  ) => {
+  const handleAuth: SubmitHandler<{
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }> = async (data) => {
     setIsLoading(true);
-    console.log(data);
     try {
       const response = await axios.post(`${API_URL}/auth-service/register`, {
         email: data.email,
         password: data.password,
       });
 
-      setToken(response.data.token); // Сохраняем токен в хранилище
+      setToken(response.data.token);
       toast.success("Регистрация успешна!", getCustomToastStyle(isDarkMode));
       nextStep();
       stepperRef.current?.handleNext?.();
@@ -101,7 +140,16 @@ function Registration() {
         "Профиль успешно обновлен!",
         getCustomToastStyle(isDarkMode),
       );
+
+      // Очищаем данные после успешной регистрации
+      clearRegistrationData();
+      resetAuth();
+      resetProfile();
       resetStep();
+
+      useRegistrationStore.persist.clearStorage();
+
+      navigate("/profile");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMessage =
@@ -118,7 +166,7 @@ function Registration() {
 
   const onError = () => {
     toast.warn(
-      "Пожалуйста, заполните все поля",
+      "Пожалуйста, заполните все поля корректно",
       getCustomToastStyle(isDarkMode),
     );
   };
@@ -148,27 +196,46 @@ function Registration() {
               type="text"
               placeholder="Электронная почта"
               {...registerAuth("email", {
-                required: true,
+                required: "Обязательное поле",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
                   message: "Некорректный email",
                 },
               })}
             />
+            {authErrors.email && (
+              <p className="mt-1 text-sm text-red-500">
+                {authErrors.email.message}
+              </p>
+            )}
 
             <Input
               type="password"
               placeholder="Придумайте пароль"
               {...registerAuth("password", {
-                required: true,
-                minLength: {
-                  value: 6,
-                  message: "Пароль должен содержать минимум 6 символов",
-                },
+                required: "Обязательное поле",
+                validate: validatePassword,
               })}
             />
+            {authErrors.password && (
+              <p className="mt-1 text-sm text-red-500">
+                {authErrors.password.message}
+              </p>
+            )}
 
-            <Input type="password" placeholder="Повторите пароль" />
+            <Input
+              type="password"
+              placeholder="Повторите пароль"
+              {...registerAuth("confirmPassword", {
+                required: "Обязательное поле",
+                validate: validateConfirmPassword,
+              })}
+            />
+            {authErrors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-500">
+                {authErrors.confirmPassword.message}
+              </p>
+            )}
 
             <div className="mx-auto mt-8 flex max-w-2xl justify-between px-4">
               <div className="flex-1" />
@@ -190,6 +257,11 @@ function Registration() {
                   required: "Обязательное поле",
                 })}
               />
+              {profileErrors.lastName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.lastName.message}
+                </p>
+              )}
 
               <Input
                 type="text"
@@ -198,6 +270,11 @@ function Registration() {
                   required: "Обязательное поле",
                 })}
               />
+              {profileErrors.firstName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.firstName.message}
+                </p>
+              )}
 
               <Input
                 type="text"
@@ -206,6 +283,11 @@ function Registration() {
                   required: "Обязательное поле",
                 })}
               />
+              {profileErrors.patronymic && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.patronymic.message}
+                </p>
+              )}
 
               <Input
                 type="date"
@@ -220,6 +302,11 @@ function Registration() {
                   },
                 })}
               />
+              {profileErrors.dateOfBirth && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.dateOfBirth.message}
+                </p>
+              )}
 
               <section className="grid grid-rows-4 gap-8">
                 <Select
@@ -228,9 +315,14 @@ function Registration() {
                   })}
                 >
                   <option value="">Пол</option>
-                  <option value="male">Мужской</option>
-                  <option value="female">Женский</option>
+                  <option value="М">Мужской</option>
+                  <option value="Ж">Женский</option>
                 </Select>
+                {profileErrors.gender && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {profileErrors.gender.message}
+                  </p>
+                )}
 
                 <Select
                   {...registerProfile("class", {
@@ -243,6 +335,11 @@ function Registration() {
                   <option value="1 курс">1 курс</option>
                   <option value="2 курс">2 курс</option>
                 </Select>
+                {profileErrors.class && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {profileErrors.class.message}
+                  </p>
+                )}
 
                 <Input
                   type="text"
@@ -251,16 +348,23 @@ function Registration() {
                     required: "Обязательное поле",
                   })}
                 />
-
-                <Select
+                {profileErrors.institute && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {profileErrors.institute.message}
+                  </p>
+                )}
+                <Input
+                  type="text"
+                  placeholder="Регион образовательного учреждения"
                   {...registerProfile("instituteRegion", {
                     required: "Обязательное поле",
                   })}
-                >
-                  <option value="">Регион организации</option>
-                  <option value="Москва">Москва</option>
-                  <option value="СПб">Санкт-Петербург</option>
-                </Select>
+                />
+                {profileErrors.instituteRegion && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {profileErrors.instituteRegion.message}
+                  </p>
+                )}
               </section>
             </div>
 
@@ -305,22 +409,37 @@ function Registration() {
                   },
                 })}
               />
+              {profileErrors.phone && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.phone.message}
+                </p>
+              )}
 
-              <Select
+              <Input
+                type="text"
+                placeholder="Регион"
                 {...registerProfile("region", {
                   required: "Обязательное поле",
                 })}
-              >
-                <option value="">Регион</option>
-                <option value="Москва">Москва</option>
-                <option value="СПб">Санкт-Петербург</option>
-              </Select>
+              />
+              {profileErrors.region && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.region.message}
+                </p>
+              )}
 
               <Input
                 type="text"
                 placeholder="Населенный пункт"
-                {...registerProfile("city", { required: "Обязательное поле" })}
+                {...registerProfile("city", {
+                  required: "Обязательное поле",
+                })}
               />
+              {profileErrors.city && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.city.message}
+                </p>
+              )}
 
               <Input
                 type="text"
@@ -333,6 +452,11 @@ function Registration() {
                   },
                 })}
               />
+              {profileErrors.snils && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.snils.message}
+                </p>
+              )}
 
               <Input
                 type="text"
@@ -341,14 +465,24 @@ function Registration() {
                   required: "Обязательное поле",
                 })}
               />
+              {profileErrors.mailAddress && (
+                <p className="mt-1 text-sm text-red-500">
+                  {profileErrors.mailAddress.message}
+                </p>
+              )}
 
               <div className="flex flex-col gap-2">
                 <label className="flex items-center gap-2 text-sm">
                   <Input type="checkbox" required />
                   Согласен на
-                  <Link to="/consent" className="text-blue-500">
+                  <a
+                    href="/consent"
+                    className="text-blue-500"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     обработку персональных данных
-                  </Link>
+                  </a>
                 </label>
 
                 <label className="flex items-center gap-2 text-sm">

@@ -241,7 +241,7 @@ const Admin = () => {
               <div
                 className={cn("rounded-2xl p-6", {
                   "bg-[#0b0f1a] outline-2 outline-blue-900": isDarkMode,
-                  "bg-white shadow-md": !isDarkMode,
+                  "bg-white shadow-md outline-2 outline-blue-500": !isDarkMode,
                 })}
               >
                 <h4 className="mb-4 text-center text-xl font-semibold">
@@ -307,7 +307,7 @@ const Admin = () => {
               <div
                 className={cn("rounded-2xl p-6", {
                   "bg-[#0b0f1a] outline-2 outline-blue-900": isDarkMode,
-                  "bg-white shadow-md": !isDarkMode,
+                  "bg-white shadow-md outline-2 outline-blue-500": !isDarkMode,
                 })}
               >
                 <h4 className="mb-4 text-center text-xl font-semibold">
@@ -373,7 +373,7 @@ const Admin = () => {
               <div
                 className={cn("rounded-2xl p-6", {
                   "bg-[#0b0f1a] outline-2 outline-blue-900": isDarkMode,
-                  "bg-white shadow-md": !isDarkMode,
+                  "bg-white shadow-md outline-2 outline-blue-500": !isDarkMode,
                 })}
               >
                 <h4 className="mb-4 text-center text-xl font-semibold">
@@ -401,7 +401,7 @@ const Admin = () => {
               <div
                 className={cn("rounded-2xl p-6", {
                   "bg-[#0b0f1a] outline-2 outline-blue-900": isDarkMode,
-                  "bg-white shadow-md": !isDarkMode,
+                  "bg-white shadow-md outline-2 outline-blue-500": !isDarkMode,
                 })}
               >
                 <h4 className="mb-4 text-center text-xl font-semibold">

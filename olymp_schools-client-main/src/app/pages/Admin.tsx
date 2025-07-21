@@ -21,6 +21,7 @@ interface LocalImage {
 
 const Admin = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const STATIC_URL = import.meta.env.VITE_STATIC_URL;
   const { token, isAuthenticated, setUserData, userData } = useAuthStore();
   const { isDarkMode } = useThemeStore();
   const queryClient = useQueryClient();
@@ -34,8 +35,10 @@ const Admin = () => {
   });
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  // Состояния для локальных изображений
+  // Состояния для изображений
   const [localImages, setLocalImages] = useState<LocalImage[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Проверка прав администратора
   useEffect(() => {
@@ -82,6 +85,20 @@ const Admin = () => {
     },
   });
 
+  // Получение списка изображений
+  const {
+    data: images,
+    isLoading: isImagesLoading,
+    error: imagesError,
+    refetch: refetchImages,
+  } = useQuery<string[]>({
+    queryKey: ["images"],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL}/news-service/images`);
+      return response.data.images;
+    },
+  });
+
   // Создание новости
   const createNewsMutation = useMutation({
     mutationFn: (newNews: Omit<INewsItem, "id">) =>
@@ -121,6 +138,21 @@ const Admin = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["news"] });
+    },
+  });
+
+  // Удаление изображения
+  const deleteImageMutation = useMutation({
+    mutationFn: async (imageUrl: string) => {
+      await axios.delete(`${API_URL}/news-service/images`, {
+        data: { imageUrl },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: () => {
+      refetchImages();
     },
   });
 
@@ -165,7 +197,6 @@ const Admin = () => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
 
-      // Создаем превью для выбранных файлов
       const newImages = files.map((file) => ({
         id: Math.random().toString(36).substring(2, 9),
         file,
@@ -178,13 +209,47 @@ const Admin = () => {
   };
 
   const handleRemoveImage = (id: string) => {
-    // Освобождаем память от превью
     const imageToRemove = localImages.find((img) => img.id === id);
     if (imageToRemove) {
       URL.revokeObjectURL(imageToRemove.previewUrl);
     }
 
     setLocalImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const handleUploadImages = async () => {
+    if (localImages.length === 0) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      localImages.forEach((image) => {
+        formData.append("image", image.file);
+      });
+
+      await axios.post(`${API_URL}/news-service/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      await refetchImages();
+      setLocalImages([]);
+    } catch (error) {
+      console.error("Ошибка загрузки изображений:", error);
+      setUploadError("Не удалось загрузить изображения");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteImage = (imageUrl: string) => {
+    if (confirm("Вы уверены, что хотите удалить это изображение?")) {
+      deleteImageMutation.mutate(imageUrl);
+    }
   };
 
   // Очистка превью при размонтировании компонента
@@ -367,7 +432,7 @@ const Admin = () => {
                   "text-gray-900": !isDarkMode,
                 })}
               >
-                Управление изображениями главной страницы
+                Управление изображениями
               </h3>
 
               <div
@@ -391,9 +456,20 @@ const Admin = () => {
                     })}
                   />
                   {localImages.length > 0 && (
-                    <p className="text-sm">
-                      Выбрано изображений: {localImages.length}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm">
+                        Выбрано изображений: {localImages.length}
+                      </p>
+                      <Button
+                        onClick={handleUploadImages}
+                        disabled={isUploading || localImages.length === 0}
+                      >
+                        {isUploading ? "Загрузка..." : "Загрузить"}
+                      </Button>
+                    </div>
+                  )}
+                  {uploadError && (
+                    <p className="text-sm text-red-500">{uploadError}</p>
                   )}
                 </div>
               </div>
@@ -405,10 +481,10 @@ const Admin = () => {
                 })}
               >
                 <h4 className="mb-4 text-center text-xl font-semibold">
-                  Галерея изображений
+                  Предпросмотр перед загрузкой
                 </h4>
                 {localImages.length === 0 ? (
-                  <p className="text-center">Нет загруженных изображений</p>
+                  <p className="text-center">Нет выбранных изображений</p>
                 ) : (
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                     {localImages.map((image) => (
@@ -434,6 +510,53 @@ const Admin = () => {
                           size="sm"
                           className="absolute top-2 right-2"
                           onClick={() => handleRemoveImage(image.id)}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={cn("rounded-2xl p-6", {
+                  "bg-[#0b0f1a] outline-2 outline-blue-900": isDarkMode,
+                  "bg-white shadow-md outline-2 outline-blue-500": !isDarkMode,
+                })}
+              >
+                <h4 className="mb-4 text-center text-xl font-semibold">
+                  Загруженные изображения
+                </h4>
+                {isImagesLoading ? (
+                  <div>Загрузка изображений...</div>
+                ) : imagesError ? (
+                  <div className="text-red-500">
+                    Ошибка загрузки: {imagesError.message}
+                  </div>
+                ) : images?.length === 0 ? (
+                  <p className="text-center">Нет загруженных изображений</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                    {images?.map((imageUrl, index) => (
+                      <div
+                        key={index}
+                        className={cn("relative rounded-lg border", {
+                          "border-gray-700": isDarkMode,
+                          "border-gray-200": !isDarkMode,
+                        })}
+                      >
+                        <img
+                          src={`${STATIC_URL}${imageUrl}`}
+                          alt={`Uploaded ${index}`}
+                          crossOrigin="anonymous"
+                          className="h-full w-full object-cover"
+                        />
+                        <Button
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => handleDeleteImage(imageUrl)}
+                          disabled={deleteImageMutation.isPending}
                         >
                           ×
                         </Button>

@@ -1,33 +1,41 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import cn from "clsx";
 import { useThemeStore } from "../../../stores/themeStore";
 
 function Carousel() {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const STATIC_URL = import.meta.env.VITE_STATIC_URL;
   const { isDarkMode } = useThemeStore();
   const [images, setImages] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const importImages = async () => {
+    const fetchImages = async () => {
       try {
-        // Получаем все изображения из папки assets
-        // Используем import.meta.glob для Vite
-        const modules = import.meta.glob(
-          "/src/app/assets/*.(jpeg|jpg|png|svg)",
-        );
-        const imagePaths = await Promise.all(
-          Object.keys(modules).map(async (path) => {
-            const module = await modules[path]();
-            return (module as { default: string }).default;
-          }),
-        );
-        setImages(imagePaths);
-      } catch (error) {
-        console.error("Error loading images:", error);
+        setIsLoading(true);
+        setError(null);
+
+        // Получаем список изображений с сервера
+        const response = await axios.get(`${API_URL}/news-service/images`);
+
+        // Проверяем, что сервер вернул массив изображений
+        if (response.data && Array.isArray(response.data.images)) {
+          setImages(response.data.images);
+        } else {
+          throw new Error("Некорректный формат данных");
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки изображений:", err);
+        setError("Не удалось загрузить изображения");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    importImages();
-  }, []);
+    fetchImages();
+  }, [API_URL]);
 
   return (
     <section
@@ -48,8 +56,29 @@ function Carousel() {
       {/* Карусель */}
       <div className="scrollbar-hide relative overflow-x-auto py-4">
         <div className="flex space-x-4 px-2">
-          {images.length > 0 ? (
-            images.map((src, index) => (
+          {isLoading ? (
+            <div className="flex h-60 w-full items-center justify-center">
+              <p
+                className={cn("text-lg", {
+                  "text-gray-400": isDarkMode,
+                  "text-gray-500": !isDarkMode,
+                })}
+              >
+                Загрузка изображений...
+              </p>
+            </div>
+          ) : error ? (
+            <div className="flex h-60 w-full items-center justify-center">
+              <p
+                className={cn("text-lg text-red-500", {
+                  "text-red-400": isDarkMode,
+                })}
+              >
+                {error}
+              </p>
+            </div>
+          ) : images.length > 0 ? (
+            images.map((imageUrl, index) => (
               <div
                 key={index}
                 className={cn(
@@ -61,10 +90,16 @@ function Carousel() {
                 )}
               >
                 <img
-                  src={src}
+                  src={`${STATIC_URL}${imageUrl}`}
                   alt={`Галерея ${index + 1}`}
+                  crossOrigin="anonymous"
                   className="h-60 w-auto rounded-lg object-cover"
                   loading="lazy"
+                  onError={(e) => {
+                    // Обработка ошибок загрузки изображений
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
                 />
                 <div className="absolute inset-0 rounded-lg transition-all duration-300" />
               </div>
@@ -77,7 +112,7 @@ function Carousel() {
                   "text-gray-500": !isDarkMode,
                 })}
               >
-                Загрузка изображений...
+                Нет доступных изображений
               </p>
             </div>
           )}

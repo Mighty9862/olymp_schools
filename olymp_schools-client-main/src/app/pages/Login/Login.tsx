@@ -42,13 +42,11 @@ function Login() {
         password: data.password,
       });
 
-      // Сохраняем токен и данные пользователя в хранилище
       setToken(response.data.token);
       setUserData(response.data.user);
 
       toast.success("Вход выполнен успешно!", getCustomToastStyle(isDarkMode));
 
-      // Перенаправляем пользователя в зависимости от роли
       if (response.data.user.role === "admin") {
         navigate("/admin");
       } else {
@@ -91,7 +89,7 @@ function Login() {
 
       <m.section
         className={cn(
-          "relative flex flex-col justify-center gap-16 px-4 py-20 sm:px-6 md:flex-row",
+          "relative flex flex-col items-center justify-center gap-8 px-4 py-12 sm:px-6 md:flex-row md:gap-16 md:py-20",
           {
             "bg-gradient-to-br from-[#0f172a] via-[#101b36] to-[#14213d]":
               isDarkMode,
@@ -101,47 +99,53 @@ function Login() {
         )}
       >
         <form
-          className="mt-1 ml-20 grid w-lg grid-cols-1 gap-8 sm:grid-cols-1 md:grid-cols-1"
+          className="w-full max-w-md px-4 sm:px-0 md:ml-20"
           onSubmit={handleSubmit(onSubmit, onError)}
         >
-          <Input
-            type="text"
-            placeholder="Электронная почта"
-            {...register("email", {
-              required: true,
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                message: "Некорректный email",
-              },
-            })}
-          />
-          <Input
-            type="password"
-            placeholder="Пароль"
-            {...register("password", {
-              required: true,
-              minLength: {
-                value: 5,
-                message: "Минимум 5 символов",
-              },
-            })}
-          />
-          <Button type="submit" className="py-2.5 text-lg" disabled={isLoading}>
-            {isLoading ? "Вход..." : "Войти"}
-          </Button>
-          <a
-            onClick={() => setShowForgotPasswordModal(true)}
-            className="inline-block cursor-pointer text-lg text-blue-400 transition hover:text-blue-300"
-          >
-            Забыли пароль?
-          </a>
+          <div className="grid grid-cols-1 gap-6">
+            <Input
+              type="text"
+              placeholder="Электронная почта"
+              {...register("email", {
+                required: true,
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                  message: "Некорректный email",
+                },
+              })}
+            />
+            <Input
+              type="password"
+              placeholder="Пароль"
+              {...register("password", {
+                required: true,
+                minLength: {
+                  value: 5,
+                  message: "Минимум 5 символов",
+                },
+              })}
+            />
+            <Button
+              type="submit"
+              className="py-2.5 text-lg"
+              disabled={isLoading}
+            >
+              {isLoading ? "Вход..." : "Войти"}
+            </Button>
+            <a
+              onClick={() => setShowForgotPasswordModal(true)}
+              className="inline-block cursor-pointer text-center text-lg text-blue-400 transition hover:text-blue-300"
+            >
+              Забыли пароль?
+            </a>
+          </div>
         </form>
         <m.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
           className={cn(
-            "flex h-80 w-full items-center justify-center rounded-2xl md:w-xl",
+            "mt-8 flex h-64 w-full max-w-md items-center justify-center rounded-2xl md:mt-0 md:h-80 md:w-xl",
             {
               "bg-gradient-to-br from-blue-700 to-blue-400": isDarkMode,
               "bg-gradient-to-br from-blue-400 to-blue-300": !isDarkMode,
@@ -150,7 +154,8 @@ function Login() {
         >
           <img
             src={isDarkMode ? "/logo_dark.png" : "/logo.png"}
-            className="z-10 mt-6 h-88"
+            className="z-10 h-64 object-contain md:h-80"
+            alt="Логотип"
           />
         </m.div>
       </m.section>

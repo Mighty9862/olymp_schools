@@ -53,6 +53,13 @@ export default function Profile() {
     snils: "",
     mailAddress: "",
   });
+  const [selectedOlympiads, setSelectedOlympiads] = useState<{
+    it: boolean;
+    humanities: boolean;
+  }>({
+    it: false,
+    humanities: false,
+  });
 
   // Загрузка данных профиля
   useEffect(() => {
@@ -89,6 +96,13 @@ export default function Profile() {
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleOlympiadChange = (olympiad: "it" | "humanities") => {
+    setSelectedOlympiads((prev) => ({
+      ...prev,
+      [olympiad]: !prev[olympiad],
+    }));
+  };
+
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -112,6 +126,7 @@ export default function Profile() {
           },
         },
       );
+      // Здесь можно добавить сохранение выбранных олимпиад, если нужно
       toast.success(
         "Профиль успешно обновлен!",
         getCustomToastStyle(isDarkMode),
@@ -563,6 +578,149 @@ export default function Profile() {
                     ) : (
                       <p className="mt-1 text-xl">{userData.snils}</p>
                     )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Блок выбора олимпиад */}
+              <div className="mt-8">
+                <h3
+                  className={cn("mb-4 text-xl font-bold", {
+                    "text-blue-300": isDarkMode,
+                    "text-blue-600": !isDarkMode,
+                  })}
+                >
+                  Выберите профиль олимпиады
+                </h3>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div
+                    className={cn(
+                      "group cursor-pointer rounded-lg border-2 p-4 transition-all hover:shadow-md",
+                      {
+                        "border-blue-500 bg-blue-500/10": selectedOlympiads.it,
+                        "border-gray-300 hover:border-blue-300":
+                          !selectedOlympiads.it,
+                        "border-gray-700 hover:border-blue-500":
+                          isDarkMode && !selectedOlympiads.it,
+                      },
+                    )}
+                    onClick={() => handleOlympiadChange("it")}
+                  >
+                    <div className="flex items-start">
+                      <div
+                        className={cn(
+                          "mt-1 mr-3 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all",
+                          {
+                            "border-blue-500 bg-blue-500 text-white":
+                              selectedOlympiads.it,
+                            "border-gray-400 group-hover:border-blue-400":
+                              !selectedOlympiads.it,
+                            "border-gray-500 group-hover:border-blue-500":
+                              isDarkMode && !selectedOlympiads.it,
+                          },
+                        )}
+                      >
+                        {selectedOlympiads.it && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="h-3 w-3"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold">
+                          Информационная безопасность
+                        </h3>
+                        <p
+                          className={cn("mt-2 text-sm", {
+                            "text-gray-600": !isDarkMode,
+                            "text-gray-300": isDarkMode,
+                          })}
+                        >
+                          Какое-то интересное описание олимпиады для поступающих
+                          на ИБ
+                        </p>
+                        {selectedOlympiads.it && (
+                          <div className="mt-2 text-sm font-medium text-blue-500">
+                            Выбрано
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={cn(
+                      "group cursor-pointer rounded-lg border-2 p-4 transition-all hover:shadow-md",
+                      {
+                        "border-blue-500 bg-blue-500/10":
+                          selectedOlympiads.humanities,
+                        "border-gray-300 hover:border-blue-300":
+                          !selectedOlympiads.humanities,
+                        "border-gray-700 hover:border-blue-500":
+                          isDarkMode && !selectedOlympiads.humanities,
+                      },
+                    )}
+                    onClick={() => handleOlympiadChange("humanities")}
+                  >
+                    <div className="flex items-start">
+                      <div
+                        className={cn(
+                          "mt-1 mr-3 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all",
+                          {
+                            "border-blue-500 bg-blue-500 text-white":
+                              selectedOlympiads.humanities,
+                            "border-gray-400 group-hover:border-blue-400":
+                              !selectedOlympiads.humanities,
+                            "border-gray-500 group-hover:border-blue-500":
+                              isDarkMode && !selectedOlympiads.humanities,
+                          },
+                        )}
+                      >
+                        {selectedOlympiads.humanities && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="h-3 w-3"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold">
+                          Обществознание
+                        </h3>
+                        <p
+                          className={cn("mt-2 text-sm", {
+                            "text-gray-600": !isDarkMode,
+                            "text-gray-300": isDarkMode,
+                          })}
+                        >
+                          Менее крутое описание для поступающих на остальные
+                          факультеты
+                        </p>
+                        {selectedOlympiads.humanities && (
+                          <div className="mt-2 text-sm font-medium text-blue-500">
+                            Выбрано
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

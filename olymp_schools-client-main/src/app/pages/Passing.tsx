@@ -67,9 +67,8 @@ function Passing() {
               )}
 
               <p className="mb-6">
-                По результатам регистрации Вам будет направлен логин и пароль
-                для прохождения отборочного этапа по данному адресу электронной
-                почты:{" "}
+                По результатам регистрации Вам дополнительно будет отправлено
+                письмо с данного адреса электронной почты:{" "}
                 <a
                   href="mailto:olimpiada.mosu@mail.ru"
                   className={cn("font-medium", {
@@ -80,17 +79,13 @@ function Passing() {
                   olimpiada.mosu@mail.ru
                 </a>
               </p>
-
               <a
                 href="https://moodle.mosu-mvd.com/mod/quiz/view.php?id=337"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={cn("font-medium", {
-                  "text-blue-400": isDarkMode,
-                  "text-blue-600": !isDarkMode,
-                })}
+                className="flex justify-center"
               >
-                Нажмите для прохождения отборочного этапа
+                <Button className="px-4 py-4 text-lg">Нажмите для прохождения отборочного этапа</Button>
               </a>
             </div>
 

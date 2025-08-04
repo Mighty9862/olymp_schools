@@ -6,14 +6,18 @@ function Footer() {
 
   return (
     <footer
-      className={cn("grid grid-cols-2 text-center border-t py-6 text-sm text-gray-500", {
-        "border-[#2c313c] bg-[#0d1117]": isDarkMode,
-        "border-gray-200 bg-white": !isDarkMode,
-      })}
+      className={cn(
+        "text-md grid grid-cols-1 gap-4 border-t py-4 text-center text-gray-500 md:grid-cols-2",
+        {
+          "border-[#2c313c] bg-[#0d1117]": isDarkMode,
+          "border-gray-200 bg-white": !isDarkMode,
+        },
+      )}
     >
       <section>
-        Официальный сайт Министерства внутренних дел Российской Федерации
-        <br />© 2025, МВД России
+        Проект разработан <br /> курсантами факультета подготовки специалистов в
+        области информационной безопасности <br /> Московского университета МВД
+        России имени В.Я. Кикотя
       </section>
       <section>
         Организационный комитет

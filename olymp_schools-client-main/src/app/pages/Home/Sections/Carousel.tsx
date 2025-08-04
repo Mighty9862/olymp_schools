@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import cn from "clsx";
 import { useThemeStore } from "../../../stores/themeStore";
 
-function Carousel() {
+function InfiniteCarousel() {
   const API_URL = import.meta.env.VITE_API_URL;
   const STATIC_URL = import.meta.env.VITE_STATIC_URL;
   const { isDarkMode } = useThemeStore();
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollSpeed = 30;
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -17,12 +19,11 @@ function Carousel() {
         setIsLoading(true);
         setError(null);
 
-        // Получаем список изображений с сервера
         const response = await axios.get(`${API_URL}/news-service/images`);
 
-        // Проверяем, что сервер вернул массив изображений
         if (response.data && Array.isArray(response.data.images)) {
-          setImages(response.data.images);
+          // Дублируем изображения для бесшовной прокрутки
+          setImages([...response.data.images, ...response.data.images]);
         } else {
           throw new Error("Некорректный формат данных");
         }
@@ -36,6 +37,36 @@ function Carousel() {
 
     fetchImages();
   }, [API_URL]);
+
+  useEffect(() => {
+    if (images.length > 0) {
+      const carousel = carouselRef.current;
+      if (!carousel) return;
+
+      let requestId: number;
+      let lastTimestamp = 0;
+
+      const animateScroll = (timestamp: number) => {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const delta = timestamp - lastTimestamp;
+        lastTimestamp = timestamp;
+
+        if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+          carousel.scrollLeft = 0;
+        } else {
+          carousel.scrollLeft += delta / scrollSpeed;
+        }
+
+        requestId = requestAnimationFrame(animateScroll);
+      };
+
+      requestId = requestAnimationFrame(animateScroll);
+
+      return () => {
+        cancelAnimationFrame(requestId);
+      };
+    }
+  }, [images]);
 
   return (
     <section
@@ -53,9 +84,11 @@ function Carousel() {
         Галерея
       </h2>
 
-      {/* Карусель */}
-      <div className="scrollbar-hide relative overflow-x-auto py-4">
-        <div className="flex space-x-4 px-2">
+      <div
+        ref={carouselRef}
+        className="scrollbar-hide relative overflow-x-hidden py-4"
+      >
+        <div className="flex space-x-4">
           {isLoading ? (
             <div className="flex h-60 w-full items-center justify-center">
               <p
@@ -81,27 +114,22 @@ function Carousel() {
             images.map((imageUrl, index) => (
               <div
                 key={index}
-                className={cn(
-                  "relative shrink-0 rounded-lg shadow-lg transition-all duration-300",
-                  {
-                    "bg-gray-800": isDarkMode,
-                    "bg-gray-100": !isDarkMode,
-                  },
-                )}
+                className={cn("relative shrink-0 rounded-lg shadow-lg", {
+                  "bg-gray-800": isDarkMode,
+                  "bg-gray-100": !isDarkMode,
+                })}
               >
                 <img
                   src={`${STATIC_URL}${imageUrl}`}
-                  alt={`Галерея ${index + 1}`}
+                  alt={`Галерея ${(index % (images.length / 2)) + 1}`}
                   crossOrigin="anonymous"
                   className="h-60 w-auto rounded-lg object-cover"
                   loading="lazy"
                   onError={(e) => {
-                    // Обработка ошибок загрузки изображений
                     const target = e.target as HTMLImageElement;
                     target.style.display = "none";
                   }}
                 />
-                <div className="absolute inset-0 rounded-lg transition-all duration-300" />
               </div>
             ))
           ) : (
@@ -122,4 +150,4 @@ function Carousel() {
   );
 }
 
-export default Carousel;
+export default InfiniteCarousel;

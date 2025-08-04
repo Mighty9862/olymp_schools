@@ -8,148 +8,27 @@ import { fadeUp } from "../components/animations/fadeUp";
 import { BackgroundBlobs } from "../components/ui/BackgroundBlobs/BackgroundBlobs";
 import Navbar from "../components/layout/Navbar/Navbar";
 import { columnVariants } from "../components/animations/columnVariants";
+import { qualifResults } from "../../data/mockData";
+import { useState } from "react";
+import { useDebounce } from "../../hooks/useDebounce";
 
 function QualifyingResults() {
   const { isDarkMode } = useThemeStore();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Моковые данные участников
-  const participants = [
-    {
-      id: 1,
-      lastName: "Иванов",
-      firstName: "Иван",
-      middleName: "Иванович",
-      grade: "11 класс",
-      region: "Москва",
-      score: 95,
-    },
-    {
-      id: 2,
-      lastName: "Петрова",
-      firstName: "Анна",
-      middleName: "Сергеевна",
-      grade: "10 класс",
-      region: "Санкт-Петербург",
-      score: 89,
-    },
-    {
-      id: 3,
-      lastName: "Сидоров",
-      firstName: "Алексей",
-      middleName: "Дмитриевич",
-      grade: "11 класс",
-      region: "Новосибирск",
-      score: 78,
-    },
-    {
-      id: 4,
-      lastName: "Кузнецова",
-      firstName: "Мария",
-      middleName: "Алексеевна",
-      grade: "9 класс",
-      region: "Екатеринбург",
-      score: 85,
-    },
-    {
-      id: 5,
-      lastName: "Васильев",
-      firstName: "Павел",
-      middleName: "Игоревич",
-      grade: "10 класс",
-      region: "Казань",
-      score: 82,
-    },
-    {
-      id: 6,
-      lastName: "Морозова",
-      firstName: "Екатерина",
-      middleName: "Владимировна",
-      grade: "11 класс",
-      region: "Самара",
-      score: 91,
-    },
-    {
-      id: 7,
-      lastName: "Смирнов",
-      firstName: "Дмитрий",
-      middleName: "Андреевич",
-      grade: "9 класс",
-      region: "Ростов-на-Дону",
-      score: 76,
-    },
-    {
-      id: 8,
-      lastName: "Попова",
-      firstName: "Ольга",
-      middleName: "Петровна",
-      grade: "10 класс",
-      region: "Воронеж",
-      score: 88,
-    },
-    {
-      id: 9,
-      lastName: "Козлов",
-      firstName: "Георгий",
-      middleName: "Алексеевич",
-      grade: "11 класс",
-      region: "Краснодар",
-      score: 93,
-    },
-    {
-      id: 10,
-      lastName: "Соколова",
-      firstName: "Алина",
-      middleName: "Сергеевна",
-      grade: "9 класс",
-      region: "Пермь",
-      score: 80,
-    },
-    {
-      id: 11,
-      lastName: "Михайлов",
-      firstName: "Виктор",
-      middleName: "Денисович",
-      grade: "10 класс",
-      region: "Тюмень",
-      score: 86,
-    },
-    {
-      id: 12,
-      lastName: "Федорова",
-      firstName: "Светлана",
-      middleName: "Игоревна",
-      grade: "11 класс",
-      region: "Уфа",
-      score: 90,
-    },
-    {
-      id: 13,
-      lastName: "Волков",
-      firstName: "Артём",
-      middleName: "Валерьевич",
-      grade: "10 класс",
-      region: "Челябинск",
-      score: 79,
-    },
-    {
-      id: 14,
-      lastName: "Зайцева",
-      firstName: "Елена",
-      middleName: "Андреевна",
-      grade: "9 класс",
-      region: "Омск",
-      score: 84,
-    },
-    {
-      id: 15,
-      lastName: "Григорьев",
-      firstName: "Максим",
-      middleName: "Павлович",
-      grade: "11 класс",
-      region: "Владивосток",
-      score: 92,
-    },
-  ];
+  const debouncedSearch = useDebounce(searchTerm, 400);
+
+  // Фильтрация и сортировка с использованием поискового значения
+  const sortedParticipants = [...qualifResults].sort(
+    (a, b) => b.score - a.score,
+  );
+
+  // Фильтр с сохранением места в рей
+  const filteredParticipants = sortedParticipants.filter((participant) => {
+    const fullName =
+      `${participant.lastName} ${participant.firstName} ${participant.middleName}`.toLowerCase();
+    return fullName.includes(debouncedSearch.toLowerCase().trim());
+  });
 
   return (
     <div
@@ -192,18 +71,47 @@ function QualifyingResults() {
 
               <div className="mb-6 rounded-lg border border-blue-900/20 bg-blue-900/10 p-4">
                 <p className="font-semibold">
-                  260 участников получают электронный сертификат участника
-                  Олимпиады.
+                  Участники, набравшие больше 20 баллов, получают электронный
+                  сертификат участника Олимпиады.
                 </p>
               </div>
 
               <a
                 href="https://mvd.ru/upload/site116/folder_page/045/106/727/final_20_3.pdf"
-                className="mb-4 text-xl font-semibold text-blue-400"
+                className="mb-4 text-xl font-semibold text-blue-300"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Финалисты Олимпиады школьников «Университет цифровой полиции» по
-                информационной безопасности 2024-2025 учебного года.
+                Участники, прошедшие в финал Олимпиады школьников «Университет
+                цифровой полиции» по информационной безопасности 2024-2025
+                учебного года.
               </a>
+
+              {/* Поле поиска */}
+              <div className="mt-6">
+                <label
+                  htmlFor="search"
+                  className="text-md mb-2 block font-medium"
+                >
+                  Поиск по ФИО
+                </label>
+                <input
+                  id="search"
+                  type="text"
+                  placeholder="Введите фамилию, имя или отчество..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={cn(
+                    "w-full rounded-lg border px-4 py-2 text-base focus:ring-2 focus:outline-none",
+                    {
+                      "border-blue-700 bg-gray-800 text-white focus:ring-blue-500":
+                        isDarkMode,
+                      "border-blue-300 bg-white text-gray-900 focus:ring-blue-400":
+                        !isDarkMode,
+                    },
+                  )}
+                />
+              </div>
 
               {/* Таблица участников */}
               <div className="mt-6 overflow-x-auto">
@@ -215,107 +123,132 @@ function QualifyingResults() {
                         "bg-blue-200": !isDarkMode,
                       })}
                     >
-                      {[
-                        "№ п/п",
-                        "Фамилия",
-                        "Имя",
-                        "Отчество",
-                        "Балл",
-                        "Сертификат",
-                      ].map((header, i) => (
-                        <m.th
-                          key={i}
-                          custom={i}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className={cn("px-4 py-3 text-center align-middle", {
-                            "text-blue-300": isDarkMode,
-                            "text-blue-800": !isDarkMode,
-                          })}
-                        >
-                          {header}
-                        </m.th>
-                      ))}
+                      {["№ п/п", "Фамилия", "Имя", "Отчество", "Балл"].map(
+                        (header, i) => (
+                          <m.th
+                            key={i}
+                            custom={i}
+                            initial="hidden"
+                            animate="visible"
+                            variants={columnVariants}
+                            className={cn(
+                              "px-4 py-3 text-center align-middle",
+                              {
+                                "text-blue-300": isDarkMode,
+                                "text-blue-800": !isDarkMode,
+                              },
+                            )}
+                          >
+                            {header}
+                          </m.th>
+                        ),
+                      )}
                     </tr>
                   </thead>
                   <tbody>
-                    {participants.map((participant, index) => (
-                      <tr
-                        key={participant.id}
-                        className={cn("border-b", {
-                          "border-blue-700/30 hover:bg-blue-900/10": isDarkMode,
-                          "border-blue-200 hover:bg-blue-100": !isDarkMode,
-                        })}
+                    {filteredParticipants.length > 0 ? (
+                      filteredParticipants.map((participant) => {
+                        // Настоящий номер в рейтинге
+                        const rank =
+                          sortedParticipants.findIndex(
+                            (p) => p.id === participant.id,
+                          ) + 1;
+                        return (
+                          <tr
+                            key={participant.id}
+                            className={cn("border-b", {
+                              "border-blue-700/30 hover:bg-blue-900/10":
+                                isDarkMode,
+                              "border-blue-200 hover:bg-blue-100": !isDarkMode,
+                            })}
+                          >
+                            <m.td
+                              custom={0}
+                              initial="hidden"
+                              animate="visible"
+                              variants={columnVariants}
+                              className="px-4 py-3 text-center"
+                            >
+                              {rank}
+                            </m.td>
+                            <m.td
+                              custom={1}
+                              initial="hidden"
+                              animate="visible"
+                              variants={columnVariants}
+                              className="px-4 py-3 text-center"
+                            >
+                              {participant.lastName}
+                            </m.td>
+                            <m.td
+                              custom={2}
+                              initial="hidden"
+                              animate="visible"
+                              variants={columnVariants}
+                              className="px-4 py-3 text-center"
+                            >
+                              {participant.firstName}
+                            </m.td>
+                            <m.td
+                              custom={3}
+                              initial="hidden"
+                              animate="visible"
+                              variants={columnVariants}
+                              className="px-4 py-3 text-center"
+                            >
+                              {participant.middleName}
+                            </m.td>
+                            <m.td
+                              custom={6}
+                              initial="hidden"
+                              animate="visible"
+                              variants={columnVariants}
+                              className={cn(
+                                "px-4 py-3 text-center font-medium",
+                                {
+                                  "text-blue-400": isDarkMode,
+                                  "text-blue-600": !isDarkMode,
+                                },
+                              )}
+                            >
+                              {participant.score}
+                            </m.td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <m.tr
+                        initial="hidden"
+                        animate="visible"
+                        variants={columnVariants}
                       >
-                        <m.td
-                          custom={0}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className="px-4 py-3 text-center"
+                        <td
+                          colSpan={5}
+                          className="px-4 py-8 text-center text-lg"
                         >
-                          {index + 1}
-                        </m.td>
-                        <m.td
-                          custom={1}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className="px-4 py-3 text-center"
-                        >
-                          {participant.lastName}
-                        </m.td>
-                        <m.td
-                          custom={2}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className="px-4 py-3 text-center"
-                        >
-                          {participant.firstName}
-                        </m.td>
-                        <m.td
-                          custom={3}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className="px-4 py-3 text-center"
-                        >
-                          {participant.middleName}
-                        </m.td>
-                        <m.td
-                          custom={6}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className={cn("px-4 py-3 text-center font-medium", {
-                            "text-blue-400": isDarkMode,
-                            "text-blue-600": !isDarkMode,
-                          })}
-                        >
-                          {participant.score}
-                        </m.td>
-                        <m.td
-                          custom={7}
-                          initial="hidden"
-                          animate="visible"
-                          variants={columnVariants}
-                          className="px-4 py-3 text-center"
-                        >
-                          <Button className="px-8 py-2 text-center">
-                            Скачать
-                          </Button>
-                        </m.td>
-                      </tr>
-                    ))}
+                          <p
+                            className={cn({
+                              "text-blue-300": isDarkMode,
+                              "text-blue-700": !isDarkMode,
+                            })}
+                          >
+                            Участник не найден
+                          </p>
+                        </td>
+                      </m.tr>
+                    )}
                   </tbody>
                 </table>
               </div>
 
               <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-                <Button>Скачать полную рейтинговую таблицу (PDF)</Button>
-                <Button>Скачать все сертификаты (ZIP)</Button>
+                <a
+                  href="https://mvd.ru/upload/site116/folder_page/045/106/727/Ranzhirovannye_spiski_2_compressed.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button>Открыть полную рейтинговую таблицу (PDF)</Button>
+                </a>
               </div>
             </div>
 

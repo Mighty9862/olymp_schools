@@ -128,6 +128,9 @@ function Registration() {
           institute: data.institute,
           gender: data.gender === "male" ? "м" : "ж",
           class_name: data.class,
+          snils: data.snils,
+          mailAddress: data.mailAddress,
+          instituteRegion: data.instituteRegion,
         },
         {
           headers: {
@@ -417,7 +420,7 @@ function Registration() {
 
               <Input
                 type="text"
-                placeholder="Регион"
+                placeholder="Регион проживания"
                 {...registerProfile("region", {
                   required: "Обязательное поле",
                 })}

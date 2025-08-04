@@ -90,7 +90,7 @@ export default function Home() {
       </section>
 
       {/* Разработчики */}
-      <section
+      {/* <section
         id="developers"
         className={cn("px-4 py-14 text-center sm:px-6", {
           "bg-[#0b0f1a]": isDarkMode,
@@ -121,7 +121,7 @@ export default function Home() {
           области информационной безопасности Московского университета МВД
           России имени В.Я. Кикотя.
         </m.p>
-      </section>
+      </section> */}
 
       {/* Карусель */}
       <Carousel />
